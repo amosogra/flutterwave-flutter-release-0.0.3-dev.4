@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutterwave/core/bank_transfer_manager/bank_transfer_payment_manager.dart';
 import 'package:flutterwave/core/card_payment_manager/card_payment_manager.dart';
 import 'package:flutterwave/core/mobile_money/mobile_money_payment_manager.dart';
@@ -17,6 +16,7 @@ class FlutterwavePaymentManager {
   String txRef;
   bool isDebugMode;
   String phoneNumber;
+  String serverlessUrl;
   bool acceptAccountPayment;
   bool acceptBankTransferPayment;
   bool acceptCardPayment;
@@ -50,6 +50,7 @@ class FlutterwavePaymentManager {
       required this.txRef,
       required this.isDebugMode,
       required this.phoneNumber,
+      required this.serverlessUrl,
       this.country,
       this.acceptAccountPayment = false,
       this.acceptBankTransferPayment = false,
@@ -86,6 +87,7 @@ class FlutterwavePaymentManager {
         narration: this.narration,
         isPermanent: this.isPermanent,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         frequency: this.frequency,
         country: this.country,
         duration: this.duration,
@@ -104,6 +106,7 @@ class FlutterwavePaymentManager {
         narration: this.narration,
         isPermanent: this.isPermanent,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         frequency: this.frequency,
         duration: this.duration,
         redirectUrl: this.redirectUrl);
@@ -119,6 +122,7 @@ class FlutterwavePaymentManager {
         txRef: this.txRef,
         isDebugMode: this.isDebugMode,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         fullName: this.fullName,
         redirectUrl: this.redirectUrl);
   }
@@ -133,6 +137,7 @@ class FlutterwavePaymentManager {
         txRef: this.txRef,
         isDebugMode: this.isDebugMode,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         fullName: this.fullName,
         redirectUrl: this.redirectUrl);
   }
@@ -147,6 +152,7 @@ class FlutterwavePaymentManager {
         txRef: this.txRef,
         isDebugMode: this.isDebugMode,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         fullName: this.fullName,
         email: this.email,
         redirectUrl: this.redirectUrl);
@@ -161,6 +167,7 @@ class FlutterwavePaymentManager {
         txRef: this.txRef,
         isDebugMode: this.isDebugMode,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         fullName: this.fullName,
         email: this.email,
         redirectUrl: this.redirectUrl);
@@ -175,6 +182,7 @@ class FlutterwavePaymentManager {
         txRef: this.txRef,
         isDebugMode: this.isDebugMode,
         phoneNumber: this.phoneNumber,
+        serverlessUrl: serverlessUrl,
         fullName: this.fullName,
         email: this.email,
         redirectUrl: this.redirectUrl);

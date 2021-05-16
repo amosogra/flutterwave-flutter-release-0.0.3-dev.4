@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterwave/models/requests/mpesa/mpesa_request.dart';
 import 'package:flutterwave/models/responses/charge_response.dart';
@@ -14,6 +15,7 @@ class MpesaPaymentManager {
   String txRef;
   bool isDebugMode;
   String phoneNumber;
+  String serverlessUrl;
   String fullName;
   String email;
   String? redirectUrl;
@@ -28,6 +30,7 @@ class MpesaPaymentManager {
       required this.txRef,
       required this.fullName,
       required this.phoneNumber,
+      required this.serverlessUrl,
       this.redirectUrl});
 
   /// Converts instance of MpesaPaymentManager to a map
@@ -38,29 +41,33 @@ class MpesaPaymentManager {
       'email': this.email,
       'tx_ref': this.txRef,
       'fullname': this.fullName,
-      'phone_number': this.phoneNumber
+      'phone_number': this.phoneNumber,
     };
   }
 
   /// Initiates payments via Mpesa
   /// Available for only payments with KES currency
   /// returns an instance of ChargeResponse or throws an error
-  Future<ChargeResponse> payWithMpesa(
-      MpesaRequest payload, http.Client client) async {
-    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) +
-        FlutterwaveURLS.PAY_WITH_MPESA;
-    final uri = Uri.parse(url);
+  Future<ChargeResponse> payWithMpesa(MpesaRequest mpesaPayload, http.Client client) async {
+    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) + FlutterwaveURLS.PAY_WITH_MPESA;
+    final requestBody = mpesaPayload.toJson();
+
+    final headers = {HttpHeaders.authorizationHeader: this.publicKey, HttpHeaders.contentTypeHeader: "application/json"};
+    var payload = {'url': url, 'headers': headers, 'body': requestBody};
+
     try {
+      http.Response response;
+      if (!kIsWeb) {
+        response = await client.post(Uri.parse(url), headers: headers, body: jsonEncode(requestBody));
+      } else {
+        response = await client.post(Uri.parse(serverlessUrl), headers: {HttpHeaders.contentTypeHeader: "application/json"}, body: jsonEncode(payload));
+      }
 
-      final http.Response response = await client.post(uri,
-          headers: {
-            HttpHeaders.authorizationHeader: this.publicKey,
-            HttpHeaders.contentTypeHeader:'application/json'
-          },
-          body: json.encode(payload.toJson()));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw Exception('Error executing Mpesa transaction: ${response.statusCode} - ${response.reasonPhrase}');
+      }
 
-      ChargeResponse chargeResponse =
-          ChargeResponse.fromJson(json.decode(response.body));
+      ChargeResponse chargeResponse = ChargeResponse.fromJson(json.decode(response.body));
 
       return chargeResponse;
     } catch (error) {

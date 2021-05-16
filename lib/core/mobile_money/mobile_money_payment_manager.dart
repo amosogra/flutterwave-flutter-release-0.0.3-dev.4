@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterwave/models/requests/mobile_money/mobile_money_request.dart';
 import 'package:flutterwave/models/responses/charge_response.dart';
@@ -15,6 +16,7 @@ class MobileMoneyPaymentManager {
   String txRef;
   bool isDebugMode;
   String phoneNumber;
+  String serverlessUrl;
   String fullName;
   String email;
   String? redirectUrl;
@@ -27,6 +29,7 @@ class MobileMoneyPaymentManager {
       required this.txRef,
       required this.isDebugMode,
       required this.phoneNumber,
+      required this.serverlessUrl,
       required this.fullName,
       required this.email,
       this.network,
@@ -34,22 +37,26 @@ class MobileMoneyPaymentManager {
 
   /// Initiates payments via Mobile Money
   /// returns an instance of ChargeResponse or throws an error
-  Future<ChargeResponse> payWithMobileMoney(
-      MobileMoneyRequest mobileMoneyRequest, http.Client client) async {
+  Future<ChargeResponse> payWithMobileMoney(MobileMoneyRequest mobileMoneyRequest, http.Client client) async {
     final requestBody = mobileMoneyRequest.toJson();
+    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) + FlutterwaveURLS.getMobileMoneyUrl(this.currency);
 
-    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) +
-        FlutterwaveURLS.getMobileMoneyUrl(this.currency);
-    final uri = Uri.parse(url);
+    final headers = {HttpHeaders.authorizationHeader: this.publicKey, HttpHeaders.contentTypeHeader: "application/json"};
+    var payload = {'url': url, 'headers': headers, 'body': requestBody};
+
     try {
-      final http.Response response = await client.post(uri,
-          headers: {
-            HttpHeaders.authorizationHeader: this.publicKey,
-            HttpHeaders.contentTypeHeader: "application/json"
-          },
-          body: jsonEncode(requestBody));
-      ChargeResponse chargeResponse =
-          ChargeResponse.fromJson(json.decode(response.body));
+      http.Response response;
+      if (!kIsWeb) {
+        response = await client.post(Uri.parse(url), headers: headers, body: jsonEncode(requestBody));
+      } else {
+        response = await client.post(Uri.parse(serverlessUrl), headers: {HttpHeaders.contentTypeHeader: "application/json"}, body: jsonEncode(payload));
+      }
+
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw Exception('Error executing Mobile Money transaction: ${response.statusCode} - ${response.reasonPhrase}');
+      }
+
+      ChargeResponse chargeResponse = ChargeResponse.fromJson(json.decode(response.body));
 
       return chargeResponse;
     } catch (error) {

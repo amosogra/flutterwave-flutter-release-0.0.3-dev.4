@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterwave/core/metrics/metric_manager.dart';
 import 'package:flutterwave/models/requests/pay_with_bank_account/pay_with_bank_account.dart';
@@ -16,10 +17,13 @@ class BankAccountPaymentManager {
   String txRef;
   bool isDebugMode;
   String phoneNumber;
+  String serverlessUrl;
   String? accountBank;
   String? accountNumber;
   String fullName;
   String? redirectUrl;
+
+  Stopwatch? stopWatch;
 
   /// BankAccountPaymentManager constructor
   /// Available for only payments with NGN currency
@@ -31,6 +35,7 @@ class BankAccountPaymentManager {
     required this.txRef,
     required this.isDebugMode,
     required this.phoneNumber,
+    required this.serverlessUrl,
     required this.fullName,
     this.accountBank,
     this.accountNumber,
@@ -40,40 +45,37 @@ class BankAccountPaymentManager {
   /// Initiates payments via Bank Account
   /// Available for only payments with NGN currency
   /// returns an instance of ChargeResponse or throws an error
-  Future<ChargeResponse> payWithAccount(
-      BankAccountPaymentRequest bankAccountRequest, http.Client client) async {
-    final stopWatch = Stopwatch();
+  Future<ChargeResponse> payWithAccount(BankAccountPaymentRequest bankAccountRequest, http.Client client) async {
+    stopWatch = Stopwatch();
     final requestBody = bankAccountRequest.toJson();
+    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) + FlutterwaveURLS.PAY_WITH_ACCOUNT;
 
-    final url = FlutterwaveURLS.getBaseUrl(this.isDebugMode) +
-        FlutterwaveURLS.PAY_WITH_ACCOUNT;
-    final uri = Uri.parse(url);
+    final headers = {HttpHeaders.authorizationHeader: this.publicKey, HttpHeaders.contentTypeHeader: "application/json"};
+    var payload = {'url': url, 'headers': headers, 'body': requestBody};
+
+    stopWatch?.start();
     try {
-      final http.Response response = await client.post(uri,
-          headers: {
-            HttpHeaders.authorizationHeader: this.publicKey,
-            HttpHeaders.contentTypeHeader: "application/json"
-          },
-          body: jsonEncode(requestBody));
+      http.Response response;
+      if (!kIsWeb) {
+        response = await client.post(Uri.parse(url), headers: headers, body: jsonEncode(requestBody));
+      } else {
+        response = await client.post(Uri.parse(serverlessUrl), headers: {HttpHeaders.contentTypeHeader: "application/json"}, body: jsonEncode(payload));
+      }
 
-      MetricManager.logMetric(
-          client,
-          publicKey,
-          MetricManager.INITIATE_ACCOUNT_CHARGE,
-          "${stopWatch.elapsedMilliseconds}ms");
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw Exception('Error executing Bank Account transaction: ${response.statusCode} - ${response.reasonPhrase}');
+      }
 
-      ChargeResponse bankTransferResponse =
-          ChargeResponse.fromJson(json.decode(response.body));
+      MetricManager.logMetric(client, publicKey, MetricManager.INITIATE_ACCOUNT_CHARGE, "${stopWatch?.elapsedMilliseconds}ms");
+
+      ChargeResponse bankTransferResponse = ChargeResponse.fromJson(json.decode(response.body));
 
       return bankTransferResponse;
     } catch (error) {
-
-      MetricManager.logMetric(
-          client,
-          publicKey,
-          MetricManager.INITIATE_ACCOUNT_CHARGE_ERROR,
-          "${stopWatch.elapsedMilliseconds}ms");
+      MetricManager.logMetric(client, publicKey, MetricManager.INITIATE_ACCOUNT_CHARGE_ERROR, "${stopWatch?.elapsedMilliseconds}ms");
       throw (FlutterError(error.toString()));
+    } finally {
+      stopWatch?.stop();
     }
   }
 }
