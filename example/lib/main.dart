@@ -61,8 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   keyboardType: TextInputType.number,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(hintText: "Amount"),
-                  validator: (value) =>
-                      value.isNotEmpty ? null : "Amount is required",
+                  validator: (value) => value.isNotEmpty ? null : "Amount is required",
                 ),
               ),
               Container(
@@ -76,8 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: InputDecoration(
                     hintText: "Currency",
                   ),
-                  validator: (value) =>
-                      value.isNotEmpty ? null : "Currency is required",
+                  validator: (value) => value.isNotEmpty ? null : "Currency is required",
                 ),
               ),
               Container(
@@ -113,8 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: InputDecoration(
                     hintText: "Email",
                   ),
-                  validator: (value) =>
-                      value.isNotEmpty ? null : "Email is required",
+                  validator: (value) => value.isNotEmpty ? null : "Email is required",
                 ),
               ),
               Container(
@@ -126,8 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: InputDecoration(
                     hintText: "Phone Number",
                   ),
-                  validator: (value) =>
-                      value.isNotEmpty ? null : "Phone Number is required",
+                  validator: (value) => value.isNotEmpty ? null : "Phone Number is required",
                 ),
               ),
               Container(
@@ -189,7 +185,8 @@ class _MyHomePageState extends State<MyHomePage> {
       phoneNumber: this.phoneNumberController.text.trim(),
       acceptAccountPayment: true,
       acceptCardPayment: true,
-      acceptUSSDPayment: true
+      acceptUSSDPayment: true,
+      serverlessUrl: 'https://<yourdomain>/.netlify/functions/flutterwave-payment',
     );
     final response = await flutterwave.initializeForUiPayments();
     if (response != null) {
