@@ -180,6 +180,7 @@ class _PayWithUssdState extends State<PayWithUssd> {
               this._chargeResponse!.data!.flwRef!,
               client,
               this.widget._paymentManager.publicKey,
+              this.widget._paymentManager.serverlessUrl,
               this.widget._paymentManager.isDebugMode);
 
           if (response!.data!.status == FlutterwaveConstants.SUCCESSFUL &&

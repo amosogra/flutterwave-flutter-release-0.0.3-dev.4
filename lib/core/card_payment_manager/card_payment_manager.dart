@@ -208,6 +208,6 @@ class CardPaymentManager {
 
   /// This method is responsible for updating a card request with the card's OTP
   Future<ChargeResponse> addOTP(String otp, String flwRef) async {
-    return FlutterwaveAPIUtils.validatePayment(otp, flwRef, http.Client(), this.isDebugMode, this.publicKey, false, MetricManager.VALIDATE_CARD_CHARGE);
+    return FlutterwaveAPIUtils.validatePayment(otp, flwRef, http.Client(), this.serverlessUrl, this.isDebugMode, this.publicKey, false, MetricManager.VALIDATE_CARD_CHARGE);
   }
 }

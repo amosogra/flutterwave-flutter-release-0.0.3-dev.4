@@ -240,6 +240,7 @@ class _CardPaymentState extends State<CardPayment>
           flwRef,
           http.Client(),
           this.widget._paymentManager.publicKey,
+          this.widget._paymentManager.serverlessUrl,
           this.widget._paymentManager.isDebugMode,
           MetricManager.VERIFY_CARD_CHARGE);
       this._closeDialog();
@@ -300,6 +301,7 @@ class _CardPaymentState extends State<CardPayment>
         chargeResponse.data!.flwRef!,
         http.Client(),
         this.widget._paymentManager.publicKey,
+        this.widget._paymentManager.serverlessUrl,
         this.widget._paymentManager.isDebugMode,
         MetricManager.VERIFY_CARD_CHARGE);
     this._closeDialog();

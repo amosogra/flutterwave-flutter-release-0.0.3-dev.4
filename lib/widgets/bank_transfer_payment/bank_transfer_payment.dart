@@ -118,6 +118,7 @@ class _PayWithBankTransferState extends State<PayWithBankTransfer> {
               this._bankTransferResponse!.meta!.authorization!.transferReference,
               client,
               this.widget._paymentManager.publicKey,
+              this.widget._paymentManager.serverlessUrl,
               this.widget._paymentManager.isDebugMode);
 
 

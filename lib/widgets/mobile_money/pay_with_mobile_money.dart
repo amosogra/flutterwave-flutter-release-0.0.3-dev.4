@@ -406,6 +406,7 @@ class _PayWithMobileMoneyState extends State<PayWithMobileMoney> {
             flwRef,
             client,
             this.widget._paymentManager.publicKey,
+            this.widget._paymentManager.serverlessUrl,
             this.widget._paymentManager.isDebugMode);
         if ((response!.data!.status == FlutterwaveConstants.SUCCESSFUL ||
                 response!.data!.status == FlutterwaveConstants.SUCCESS) &&

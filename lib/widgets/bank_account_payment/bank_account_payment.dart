@@ -41,7 +41,7 @@ class PayWithBankAccountState extends State<PayWithBankAccount> {
   @override
   void initState() {
     super.initState();
-    this.banks = FlutterwaveAPIUtils.getBanks(http.Client());
+    this.banks = FlutterwaveAPIUtils.getBanks(http.Client(), widget._paymentManager.serverlessUrl);
   }
 
   @override
@@ -311,6 +311,7 @@ class PayWithBankAccountState extends State<PayWithBankAccount> {
         response = await FlutterwaveAPIUtils.verifyPayment(
             chargeResponse.data!.flwRef!,
             client,
+            this.widget._paymentManager.serverlessUrl,
             this.widget._paymentManager.publicKey,
             this.widget._paymentManager.isDebugMode,
             MetricManager.ACCOUNT_CHARGE_VERIFY);
@@ -377,6 +378,7 @@ class PayWithBankAccountState extends State<PayWithBankAccount> {
         otp,
         flwRef,
         client,
+        this.widget._paymentManager.serverlessUrl,
         this.widget._paymentManager.isDebugMode,
         this.widget._paymentManager.publicKey,
         true,
